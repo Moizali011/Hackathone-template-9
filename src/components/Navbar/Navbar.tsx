@@ -1,17 +1,35 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  FaShoppingCart,
-  FaUserAlt,
-  FaBars,
-  FaTimes,
-  FaSearch,
-} from "react-icons/fa";
+import { FaShoppingCart, FaUserAlt, FaBars, FaTimes, FaSearch } from "react-icons/fa";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartQuantity, setCartQuantity] = useState(0);
+
+  useEffect(() => {
+    const fetchCartQuantity = () => {
+      try {
+        const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const totalQuantity = storedCart.reduce(
+          (total: number, item: { quantity?: number }) => total + (item.quantity || 1),
+          0
+        );
+        setCartQuantity(totalQuantity);
+      } catch (error) {
+        console.error("Error parsing cart data:", error);
+        setCartQuantity(0);
+      }
+    };
+
+    fetchCartQuantity();
+    window.addEventListener("storage", fetchCartQuantity);
+
+    return () => {
+      window.removeEventListener("storage", fetchCartQuantity);
+    };
+  }, []);
 
   return (
     <header className="bg-black text-white">
@@ -31,15 +49,8 @@ export default function Navbar() {
             <Link href="/About" className="hover:text-orange-500">
               About
             </Link>
-            {/* Dropdown */}
             <div className="absolute hidden group-hover:block bg-gray-800 text-white py-2 rounded">
-              <Link href="/About" className="block px-4 py-1 hover:bg-gray-700">
-                About Us
-              </Link>
-              <Link
-                href="/ChefTeam"
-                className="block px-4 py-1 hover:bg-gray-700"
-              >
+              <Link href="/ChefTeam" className="block px-4 py-1 hover:bg-orange-400">
                 Our Team
               </Link>
             </div>
@@ -61,7 +72,6 @@ export default function Navbar() {
 
         {/* Search, Cart, and Auth Icons (Right-Aligned) */}
         <div className="hidden lg:flex items-center space-x-4">
-          {/* Search Bar */}
           <div className="relative flex items-center">
             <FaSearch className="absolute left-3 text-orange-500 z-10" />
             <input
@@ -71,19 +81,19 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Cart Icon */}
-
-          <Link href="Cart">
-            <button className="text-white-500">
-              <FaShoppingCart size={20} />
-            </button>
+          {/* Cart Icon with Quantity */}
+          <Link href="/Cart" className="relative">
+            <FaShoppingCart size={20} className="text-white" />
+            {cartQuantity > 0 && (
+              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
+                {cartQuantity}
+              </span>
+            )}
           </Link>
 
           {/* User Icon */}
           <Link href="/SignUp">
-            <button className="text-white-500">
-              <FaUserAlt size={20} />
-            </button>
+            <FaUserAlt size={20} className="text-white" />
           </Link>
         </div>
 
@@ -130,16 +140,16 @@ export default function Navbar() {
 
           {/* Icons (Mobile) */}
           <div className="flex justify-around mt-4 space-x-4">
-            <Link href="Cart">
-              <button className="text-white-500">
-                <FaShoppingCart size={20} />
-              </button>
+            <Link href="/Cart" className="relative">
+              <FaShoppingCart size={20} className="text-white" />
+              {cartQuantity > 0 && (
+                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartQuantity}
+                </span>
+              )}
             </Link>
-
             <Link href="/SignUp">
-              <button className="text-white-500">
-                <FaUserAlt size={20} />
-              </button>
+              <FaUserAlt size={20} className="text-white" />
             </Link>
           </div>
         </div>
