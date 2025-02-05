@@ -3,33 +3,51 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaShoppingCart, FaUserAlt, FaBars, FaTimes, FaSearch } from "react-icons/fa";
+import { client } from "@/sanity/lib/client";
+
+// Define the Product type
+type Product = {
+  _id: string;
+  name: string;
+  slug: {
+    current: string;
+  };
+};
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [cartQuantity, setCartQuantity] = useState(0);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
+  // Fetch products from Sanity on component mount
   useEffect(() => {
-    const fetchCartQuantity = () => {
-      try {
-        const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-        const totalQuantity = storedCart.reduce(
-          (total: number, item: { quantity?: number }) => total + (item.quantity || 1),
-          0
-        );
-        setCartQuantity(totalQuantity);
-      } catch (error) {
-        console.error("Error parsing cart data:", error);
-        setCartQuantity(0);
-      }
+    const fetchProducts = async () => {
+      const query = `*[_type == "food"]{ _id, name }`;
+      const products = await client.fetch<Product[]>(query);
+      setProducts(products);
     };
 
-    fetchCartQuantity();
-    window.addEventListener("storage", fetchCartQuantity);
-
-    return () => {
-      window.removeEventListener("storage", fetchCartQuantity);
-    };
+    fetchProducts();
   }, []);
+
+  // Handle search input change
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Filter products based on the search query
+    if (query) {
+      const filteredProducts = products
+        .filter((product) =>
+          product.name.toLowerCase().includes(query.toLowerCase())
+        )
+        .slice(0, 5); // Limit to 5 results
+      setSearchResults(filteredProducts);
+    } else {
+      setSearchResults([]);
+    }
+  };
 
   return (
     <header className="bg-black text-white">
@@ -49,8 +67,12 @@ export default function Navbar() {
             <Link href="/About" className="hover:text-orange-500">
               About
             </Link>
+            {/* Dropdown */}
             <div className="absolute hidden group-hover:block bg-gray-800 text-white py-2 rounded">
-              <Link href="/ChefTeam" className="block px-4 py-1 hover:bg-orange-400">
+              <Link href="/About" className="block px-4 py-1 hover:bg-gray-700">
+                About Us
+              </Link>
+              <Link href="/ChefTeam" className="block px-4 py-1 hover:bg-gray-700">
                 Our Team
               </Link>
             </div>
@@ -72,28 +94,44 @@ export default function Navbar() {
 
         {/* Search, Cart, and Auth Icons (Right-Aligned) */}
         <div className="hidden lg:flex items-center space-x-4">
+          {/* Search Bar */}
           <div className="relative flex items-center">
             <FaSearch className="absolute left-3 text-orange-500 z-10" />
             <input
               type="text"
               placeholder="Search..."
               className="bg-gray-900 text-white px-4 py-2 pl-10 rounded-full focus:outline-none border border-orange-500"
+              value={searchQuery}
+              onChange={handleSearch}
             />
+            {/* Display search results */}
+            {searchResults.length > 0 && (
+              <div className="absolute top-12 left-0 bg-gray-800 text-white w-full rounded-lg shadow-lg z-20">
+                {searchResults.map((product) => (
+                  <Link
+                    key={product._id}
+                    href={`/detail/${product._id}`} // Use the product slug for routing
+                    className="block px-4 py-2 hover:bg-gray-700"
+                  >
+                    {product.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Cart Icon with Quantity */}
-          <Link href="/Cart" className="relative">
-            <FaShoppingCart size={20} className="text-white" />
-            {cartQuantity > 0 && (
-              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
-                {cartQuantity}
-              </span>
-            )}
+          {/* Cart Icon */}
+          <Link href="/Cart">
+            <button className="text-white-500">
+              <FaShoppingCart size={20} />
+            </button>
           </Link>
 
           {/* User Icon */}
           <Link href="/SignUp">
-            <FaUserAlt size={20} className="text-white" />
+            <button className="text-white-500">
+              <FaUserAlt size={20} />
+            </button>
           </Link>
         </div>
 
@@ -135,21 +173,36 @@ export default function Navbar() {
               type="text"
               placeholder="Search..."
               className="bg-gray-900 text-white px-4 py-2 pl-10 rounded-full focus:outline-none border border-orange-500"
+              value={searchQuery}
+              onChange={handleSearch}
             />
+            {/* Display search results */}
+            {searchResults.length > 0 && (
+              <div className="absolute top-12 left-0 bg-gray-800 text-white w-full rounded-lg shadow-lg z-20">
+                {searchResults.map((product) => (
+                  <Link
+                    key={product._id}
+                    href={`/product/${product.name}`} // Use the product slug for routing
+                    className="block px-4 py-2 hover:bg-gray-700"
+                  >
+                    {product.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Icons (Mobile) */}
           <div className="flex justify-around mt-4 space-x-4">
-            <Link href="/Cart" className="relative">
-              <FaShoppingCart size={20} className="text-white" />
-              {cartQuantity > 0 && (
-                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartQuantity}
-                </span>
-              )}
+            <Link href="/Cart">
+              <button className="text-white-500">
+                <FaShoppingCart size={20} />
+              </button>
             </Link>
             <Link href="/SignUp">
-              <FaUserAlt size={20} className="text-white" />
+              <button className="text-white-500">
+                <FaUserAlt size={20} />
+              </button>
             </Link>
           </div>
         </div>

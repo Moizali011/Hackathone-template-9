@@ -10,7 +10,7 @@ type Product = {
   price: number;
   imageUrl: string;
   originalPrice?: number;
-  id: number;
+  _id: string;
 };
 
 const ShopItemClient = ({ product }: { product: Product }) => {

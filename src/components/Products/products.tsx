@@ -4,7 +4,7 @@ import Link from "next/link";
 import React from "react";
 
 type Product = {
-  id: number;
+  _id: number;
   name: string;
   price: number;
   imageUrl: string;
@@ -12,8 +12,8 @@ type Product = {
 };
 
 async function getData(): Promise<Product[]> {
-  const query = `*[_type == "products"]{
-  id,
+  const query = `*[_type == "food"]{
+  _id,
     name,
     price,
     "imageUrl": image.asset->url
@@ -51,7 +51,7 @@ const Products = async () => {
       {/* Product Grid */}
       <div className="grid grid-cols-3 gap-4 max-md:grid-cols-2 max-sm:grid-cols-1">
         {products.map((product, index) => (
-          <Link key={index} href={`/detail/${product.id}`}>
+          <Link key={index} href={`/detail/${product._id}`}>
             <div className="border border-gray-200 rounded cursor-pointer">
               <div className="relative">
                 <Image

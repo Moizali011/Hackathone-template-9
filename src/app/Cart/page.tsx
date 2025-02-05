@@ -92,7 +92,7 @@ const Cart: React.FC = () => {
                             <TableBody>
                                 {cartItems.map((item, index) => (
                                     <TableRow
-                                        key={item.id}
+                                        key={index}
                                         className="h-[72px] rounded-sm box_shadow font-medium"
                                     >
                                         <TableCell className="pl-4 max-sm:pl-0">

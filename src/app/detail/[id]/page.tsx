@@ -7,12 +7,12 @@ type Product = {
   price: number;
   imageUrl: string;
   originalPrice?: number;
-  id: number;
+  _id: string;
 };
 
 async function getData(): Promise<Product[]> {
-  const query = `*[_type == "products"]{
-    id,
+  const query = `*[_type == "food"]{
+    _id,
     name,
     price,
     "imageUrl": image.asset->url
@@ -26,7 +26,7 @@ const ShopItemServer = async ({ params }: { params: Promise<{ id: string }> }) =
   const productId = parseInt(resolvedParams.id, 10);
 
   const products: Product[] = await getData();
-  const product = products.find((prod) => prod.id === productId);
+  const product = products.find((prod) => prod._id === resolvedParams.id);
 
   if (!product) {
     return <div>Product not found</div>;
