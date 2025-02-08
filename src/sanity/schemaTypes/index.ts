@@ -1,7 +1,7 @@
 import { type SchemaTypeDefinition } from 'sanity';
-import Chefs from './Chefs';
-import Foods from './Foods';
+import chefs from './Chefs';
+import foods from './Foods';
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [Foods, Chefs],
+  types: [foods, chefs],
 };
