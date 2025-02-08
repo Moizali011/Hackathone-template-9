@@ -1,17 +1,9 @@
-
-
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'i.pravatar.cc',
-      },
-      {
-        protocol: 'https',
-        hostname: "cdn.sanity.io",
-      },
-    ],
+    domains: ['i.pravatar.cc', 'your-domain.com'], 
+    unoptimized: true,  
   },
 };
 
+export default nextConfig;
