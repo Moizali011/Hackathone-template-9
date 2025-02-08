@@ -1,5 +1,5 @@
 export default {
-    name: 'chef',
+    name: 'Chef',
     type: 'document',
     title: 'Chef',
     fields: [
